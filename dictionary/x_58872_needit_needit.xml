@@ -48,5 +48,6 @@
         <element attributes="edge_encryption_enabled=true" label="Other" max_length="40" name="u_other" type="string"/>
         <element label="Requested for" mandatory="true" max_length="32" name="u_reference_2" reference="sys_user" type="reference"/>
         <element label="Requested for" mandatory="true" max_length="32" name="u_reference_6" reference="sys_user" type="reference"/>
+        <element attributes="edge_encryption_enabled=true" label="Requested for email" max_length="40" name="u_string_1" type="string"/>
     </element>
 </database>
