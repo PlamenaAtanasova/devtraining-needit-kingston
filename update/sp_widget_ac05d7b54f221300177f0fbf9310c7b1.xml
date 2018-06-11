@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[function($scope, spUtil, $http) {
+  /* widget controller */
+  var c = this;
+	$scope.orderField = "number";
+	$scope.viewbtnText = "View Details"
+	
+	
+	spUtil.recordWatch($scope, "incident", "", function(name, data){
+		spUtil.update($scope);
+	});
+	
+	$scope.edit = function(instance) {
+		$scope.editingRecord = angular.copy(instance);
+	}
+	
+	$scope.view = function(btn) {
+		
+		
+		if($scope.showMe == btn) {
+				$scope.showMe = !$scope.showMe;
+			$scope.viewbtnText = "View Details"
+			} else {
+				$scope.showMe = btn;
+				$scope.viewbtnText = "Hide Details"
+			}
+	}
+	
+	
+	
+	$scope.reset = function(){
+		$scope.editingRecord = null;
+	}
+	
+	$scope.save = function(){
+		console.log("in save with" + $scope.editingRecord.sys_id);
+		$scope.writeIncident($scope.editingRecord.sys_id,
+												{'short_description' : $scope.editingRecord.short_description});
+		$scope.reset();
+	}
+	
+	$scope.writeIncident = function(sys_id, data){
+		console.log("in write with" + sys_id);
+		console.log(data);
+		
+		$http({
+			method:'PUT',
+			url:'/api/now/table/incident/' + sys_id,
+			headers: {'Content-Type' : 'application/json'},
+					data: data
+		});
+	};
+		$scope.changeSort = function(field){
+			if($scope.orderField == field) {
+				$scope.orderReverse = !$scope.orderReverse;
+			} else {
+				$scope.orderField = field;
+			}
+		}
+		
+	$scope.getPriorityClass = function(incident){
+		return "Priority" + incident.priority;
+	}	
+	}
+]]></client_script>
+        <controller_as>c</controller_as>
+        <css>table, the, td{
+  border:2px solid black;
+  background-color:rgb(215, 215, 215);
+  padding:10px 15px;
+  text-align: center;
+}
+button{
+  background-color: rgb(84, 243, 156);
+  border-radius: 10px;
+  border: 1px;
+  padding:10px 15px;
+  margin:8px 15px;
+  text-align:center;
+  text-decoration:none;
+  display: inline-block;
+  font-size: 16px;
+  
+}
+.Priority1{
+  background-color: red;
+}
+.Priority2{
+  background-color: orange;
+}
+.Priority3{
+  background-color: yellow;
+}
+.active-purple-2 input[type=text]:focus:not([readonly]) {
+    border-bottom: 1px solid #ce93d8;
+    box-shadow: 0 1px 0 0 #ce93d8;
+}
+.header_buttons{
+  background-color:transparent;
+  position: center;
+  padding:0px 0px;
+  text-align:left;
+}
+.form-control{
+  width:40%;
+}
+
+</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>true</has_preview>
+        <id>technow28widget</id>
+        <internal>false</internal>
+        <link/>
+        <name>TechNow28Widget</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+  /* populate the 'data' object */
+  /* e.g., data.table = $sp.getValue('table'); */
+data.incidents = [];
+	
+
+	var gr = new GlideRecord('incident');
+		gr.addActiveQuery();
+		gr.setLimit(10);
+	gr.orderByDesc('sys_updated_on');
+	gr.query();
+	
+	while(gr.next()){
+		var incident = {};
+		incident.number = gr.getDisplayValue('number');
+		incident.short_description = gr.getDisplayValue('short_description');
+		incident.sys_id = gr.getUniqueValue();
+		incident.sys_updated_on = gr.getValue('sys_updated_on');
+		incident.priority = gr.getValue('priority');
+		
+		incident.caller_id = gr.getValue('caller_id');
+		incident.category = gr.getValue('category');
+		incident.state = gr.getValue('state');
+		incident.assigned_to = gr.getValue('assigned_to');
+		
+		data.incidents.push(incident);
+	}
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2018-06-08 07:03:00</sys_created_on>
+        <sys_id>ac05d7b54f221300177f0fbf9310c7b1</sys_id>
+        <sys_mod_count>82</sys_mod_count>
+        <sys_name>TechNow28Widget</sys_name>
+        <sys_package display_value="NeedIt" source="x_58872_needit">6ead8e780f603200cd674f8ce1050ed1</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="NeedIt">6ead8e780f603200cd674f8ce1050ed1</sys_scope>
+        <sys_update_name>sp_widget_ac05d7b54f221300177f0fbf9310c7b1</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2018-06-08 12:39:37</sys_updated_on>
+        <template><![CDATA[<div>
+<!-- your widget template -->
+<!--   <pre> Editing = {{editingRecord.sys_id}}</pre> -->
+ 
+  <div class="md-form active-pink active-pink-2 mb-3">
+    <input class="form-control" type="text" placeholder="Search" aria-label="Search" ng-model="searchText">
+</div>
+  <table>
+   <tr>
+     <th>
+       <button class="header_buttons" ng-click="changeSort('number')">
+     Number
+       </button>
+     </th>
+     <th><button class="header_buttons" ng-click="changeSort('short_description')">
+     Short Description
+       </button></th>
+     <th>
+       <button class="header_buttons" ng-click="changeSort('sys_updated_on')">
+    Updated 
+       </button>
+     </th>
+     
+     
+      <th ng-show="showMe">
+       <button class="header_buttons" ng-click="changeSort('caller_id')">
+    Caller
+       </button>
+     </th>
+      <th ng-show="showMe">
+       <button class="header_buttons" ng-click="changeSort('category')">
+    Category
+       </button>
+     </th>
+      <th ng-show="showMe">
+       <button class="header_buttons" ng-click="changeSort('state')">
+    State 
+       </button>
+     </th>
+      
+      <th ng-show="showMe">
+       <button class="header_buttons" ng-click="changeSort('assigned_to')">
+    Assigned To 
+       </button>
+     </th>
+     <th></th>
+     
+     
+    </tr>
+    <tr ng-repeat="incident in data.incidents | orderBy:orderField:orderReverse | filter:searchText">
+    <td ng-class="getPriorityClass(incident)">{{incident.number}}
+      </td>
+      <td ng-if="incident.sys_id == editingRecord.sys_id">
+        <input type="text" ng-model="editingRecord.short_description" />
+      </td>
+      <td ng-if="incident.sys_id != editingRecord.sys_id">{{incident.short_description}}
+      </td>
+      <td ng-show="showMe">{{incident.sys_updated_on}}
+      </td>
+      <td ng-show="showMe">{{incident.caller_id}}
+      </td>
+       <td ng-show="showMe">{{incident.category}}
+      </td>
+       <td>{{incident.state}}
+      </td>
+      
+       <td ng-show="showMe">{{incident.assigned_to}}
+      </td>
+      <td ng-if="incident.sys_id != editingRecord.sys_id">
+        <button ng-click="edit(incident)">
+          Edit
+        </button>
+        <button ng-click="view(incident)">
+         {{ viewbtnText}} 
+        </button>
+    
+      </td>
+      <td ng-if="incident.sys_id == editingRecord.sys_id">
+        <button ng-click="save()">
+          Save
+        </button>
+     
+        <button ng-click="reset(incident)">
+          Reset
+        </button>
+      </td>
+      <tr>
+  </table>
+</div>]]></template>
+    </sp_widget>
+</record_update>
